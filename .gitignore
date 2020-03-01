@@ -1,0 +1,3 @@
+# ignore docker volumes
+html/
+mysql/

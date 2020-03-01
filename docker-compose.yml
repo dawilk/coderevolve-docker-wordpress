@@ -1,0 +1,46 @@
+version: '2'
+
+networks:
+  wordpress-backend:
+    external: false
+
+services:
+   wp-mysql:
+     image: mysql:${TAG_MYSQL}
+     container_name: ${WORDPRESS_DB_HOST}
+     command: '--default-authentication-plugin=mysql_native_password'
+     volumes:
+       - ./mysql:/var/lib/mysql
+     networks:
+       - wordpress-backend
+     restart: unless-stopped
+     # Consider removing the environment section after first launch
+     # It is not required beyond first launch and poses a security
+     # risk if left in the .env file
+     environment:
+       MYSQL_ROOT_PASSWORD: ${WORDPRESS_DB_ROOT_PASSWORD}
+       MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+       MYSQL_USER: ${WORDPRESS_DB_USER}
+       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+
+   wp:
+     depends_on:
+       - wp-mysql
+     image: wordpress:${TAG_WORDPRESS}
+     container_name: ${WORDPRESS_WEB_HOST}
+     volumes:
+       - ./html:/var/www/html
+     networks:
+       - wordpress-backend
+     ports:
+       - 80:80
+     restart: unless-stopped
+     # Consider removing the environment section after first launch
+     # It is not required beyond first launch and poses a security
+     # risk if left in the .env file
+     environment:
+       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}:3306
+       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+       WORDPRESS_CONFIG_EXTRA: "define('WP_HOME','${WP_HOME}'); define('WP_SITEURL','${WP_SITEURL}');"
