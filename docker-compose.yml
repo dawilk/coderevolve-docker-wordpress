@@ -3,6 +3,8 @@ version: '2'
 networks:
   wordpress-backend:
     external: false
+  reverseproxy:
+    external: true
 
 services:
    wp-mysql:
@@ -32,8 +34,11 @@ services:
        - ./html:/var/www/html
      networks:
        - wordpress-backend
-     ports:
-       - 80:80
+       - reverseproxy
+    #  ports:
+    #    - 80:80
+     expose:
+       - 80
      restart: unless-stopped
      # Consider removing the environment section after first launch
      # It is not required beyond first launch and poses a security
